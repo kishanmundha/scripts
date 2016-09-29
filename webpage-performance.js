@@ -18,16 +18,25 @@ var options = {
 	}
 };
 
+var interval = 1000;
+
 //console.log(process.argv);
 
 //console.log(options);
 
 if ( process.argv.length <= 2) {
-    console.log('usage: node webpage-performance <url>');
+    console.log('usage: node webpage-performance <url> [-i <interval>]');
     return;
 }
 
-var argUrl = process.argv[2];
+var args = [];
+(function() {
+    for(var i=2; i<process.argv.length; i++) {
+        args.push(process.argv[i]);
+    }
+})();
+
+var argUrl = args[0];
 
 //console.log(url.parse(argUrl));
 
@@ -39,6 +48,17 @@ if ( !options.host || !options.path ) {
     console.log(colors.red('Invalid url'));
     console.log(colors.cyan('URL Format should be like "http://domain"'));
     return;
+}
+
+args.splice(0, 1);
+
+if(args.length > 0 && args[0] == '-i' && args[1]) {
+    var _interval = parseInt(args[1]);
+
+    if(isNaN(_interval))
+        _interval = 1;
+    
+    interval = _interval * 1000;
 }
 
 var testPage = function() {
@@ -64,7 +84,7 @@ var testPage = function() {
             str += ' \t' + colors.cyan(getSizeString(resData.length));
             str += ' \t' + colors.yellow((responseTime-requestTime) + 'ms');
             console.log(str);
-            setTimeout(testPage, 1000);
+            setTimeout(testPage, interval);
 		});
 	});
 	
