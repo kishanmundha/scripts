@@ -90,7 +90,7 @@ var testPage = function() {
 	
     req.on('error', function(err) {
         console.log(colors.grey('[' + getTimeString(requestTime) + '] ') + colors.red(err));
-        setTimeout(testPage, 1000);
+        setTimeout(testPage, interval);
     })
 
 	req.end();
