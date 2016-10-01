@@ -151,14 +151,17 @@ var testPage = function () {
             return result.statusCode !== 200;
         }).length;
 
-        var totalResponseTime = 0;
-        results.forEach(function (result) {
-            if (result.statusCode === 200) {
-                totalResponseTime += result.responseTimeMs;
-            }
-        });
+        var avgResponseTime = 0;
+        if (successCount > 0) {
+            var totalResponseTime = 0;
+            results.forEach(function (result) {
+                if (result.statusCode === 200) {
+                    totalResponseTime += result.responseTimeMs;
+                }
+            });
 
-        var avgResponseTime = parseInt((totalResponseTime / successCount).toFixed(0));
+            avgResponseTime = parseInt((totalResponseTime / successCount).toFixed(0));
+        }
 
         console.log(colors.grey('Range : [' + minIndex + '-' + maxIndex + ']'));
         console.log(colors.green('Success request : ' + successCount));
