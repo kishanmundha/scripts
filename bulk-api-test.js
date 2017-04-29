@@ -1,5 +1,9 @@
+#!/usr/bin/env node
+
+/* eslint indent: ["error", 4] */
+/* eslint quotes: off */
+
 var http = require('http');
-var util = require('util');
 var colors = require('colors');
 var url = require('url');
 
@@ -18,16 +22,11 @@ var options = {
     }
 };
 
-var interval = 1000;
 var requestCount = 10;
-
-//console.log(process.argv);
-
-//console.log(options);
 
 if (process.argv.length <= 2) {
     console.log('usage: node bulk-api-test <url> [-n <number of api per second>]');
-    return;
+    process.exit();
 }
 
 var args = [];
@@ -38,8 +37,6 @@ var args = [];
 })();
 
 var argUrl = args[0];
-
-//console.log(url.parse(argUrl));
 
 var urlDetail = url.parse(argUrl);
 
@@ -55,31 +52,22 @@ if (options.protocol === 'https:') {
 if (!options.host || !options.path) {
     console.log(colors.red('Invalid url'));
     console.log(colors.cyan('URL Format should be like "http://domain"'));
-    return;
+    process.exit();
 }
 
 args.splice(0, 1);
 
-if (args.length > 0 && args[0] == '-i' && args[1]) {
-    var _interval = parseInt(args[1]);
-
-    if (isNaN(_interval))
-        _interval = 1;
-
-    interval = _interval * 1000;
-}
-
-if (args.length > 0 && args[0] == '-n' && args[1]) {
+if (args.length > 0 && args[0] === '-n' && args[1]) {
     var _count = parseInt(args[1]);
 
-    if (isNaN(_count))
+    if (isNaN(_count)) {
         _count = 1;
+    }
 
     requestCount = _count;
 }
 
 var testPage = function () {
-
     var results = [];
 
     for (var i = 0; i < requestCount; i++) {
@@ -97,11 +85,11 @@ var testPage = function () {
 
             var req = http.request(options, function (res) {
                 res.setEncoding('utf8');
-                //console.log(res.statusCode);
+                // console.log(res.statusCode);
                 var resData = '';
                 res.on('data', function (chunk) {
-                    //console.log("body: " + chunk);
-                    //console.log(colors.grey(chunk));
+                    // console.log("body: " + chunk);
+                    // console.log(colors.grey(chunk));
                     resData += chunk;
                 });
                 res.on('end', function () {
@@ -122,15 +110,13 @@ var testPage = function () {
                     str += ' \t' + colors.cyan(getSizeString(resData.length));
                     str += ' \t' + colors.yellow((responseTime - requestTime) + 'ms');
                     console.log(str);
-                    //setTimeout(testPage, interval);
                 });
             });
 
             req.on('error', function (err) {
                 result.resolved = true;
                 console.log(colors.grey('[' + getTimeString(requestTime) + '] ') + colors.red(err));
-                //setTimeout(testPage, interval);
-            })
+            });
 
             req.end();
         })();
@@ -139,13 +125,13 @@ var testPage = function () {
     var isDone = function () {
         return results.filter(function (result) {
             return !result.resolved;
-        }).length == 0;
-    }
+        }).length === 0;
+    };
 
     var showReportRange = function (results) {
         console.log(' ');
 
-        var minIndex = undefined, maxIndex = undefined;
+        var minIndex, maxIndex;
 
         minIndex = results[0].index;
         maxIndex = results[results.length - 1].index;
@@ -172,10 +158,11 @@ var testPage = function () {
 
         console.log(colors.grey('Range : [' + minIndex + '-' + maxIndex + ']'));
         console.log(colors.green('Success request : ' + successCount));
-        if (failedCount === 0)
+        if (failedCount === 0) {
             console.log('Failed request : ' + failedCount);
-        else
+        } else {
             console.log(colors.red('Failed request : ' + failedCount));
+        }
         console.log('Average response time : ' + colors.yellow(avgResponseTime + 'ms'));
     };
 
@@ -198,33 +185,40 @@ var testPage = function () {
             });
             var r2 = results.filter(function (result) {
                 return result.index > rSize && result.index <= (rSize * 2);
-            })
+            });
             var r3 = results.filter(function (result) {
                 return result.index > (rSize * 2) && result.index <= (rSize * 3);
-            })
+            });
 
             var r4 = results.filter(function (result) {
                 return result.index > (rSize * 3);
-            })
+            });
 
             showReportRange(r1);
             showReportRange(r2);
             showReportRange(r3);
             showReportRange(r4);
         }
-    }
+    };
 
     setTimeout(showReport, 1000);
-}
+};
 
 console.log(colors.grey('Testing page ') + colors.cyan(options.path) + colors.grey(' on ') + colors.cyan(options.host) + colors.grey(' at port ') + colors.cyan(options.port));
 
 setTimeout(testPage, 1000);
 
-//////////////////////////////////////////////
+/*********************************
+ * Helpers
+**********************************/
 
+/**
+ * Convert date to time string format
+ * @param {Date} date
+ * @return {String}
+ */
 var getTimeString = function (date) {
-    var d = date
+    var d = date;
     var h = d.getHours();
     var m = d.getMinutes();
     var s = d.getSeconds();
@@ -242,11 +236,15 @@ var getTimeString = function (date) {
     var _ms = "000" + ms;
     ms = _ms.substring(_ms.length - 3);
 
-    callTime = h + ':' + m + ':' + s + '.' + ms;
+    var callTime = h + ':' + m + ':' + s + '.' + ms;
 
     return callTime;
 };
 
+/**
+ * Convert long value to string format size of data
+ * @param {Number} size
+ */
 var getSizeString = function (size) {
     var sizeMap = ['Bytes', 'KB', 'MB', 'GB'];
     var indx = 0;
@@ -260,8 +258,13 @@ var getSizeString = function (size) {
     size = parseInt(size);
 
     return size + ' ' + sizeMap[indx];
-}
+};
 
+/**
+ * @param {Number} index
+ * @param {Number} maxSize
+ * @return {String}
+ */
 var getIndexNumberString = function (index, maxSize) {
     index = '' + index;
     maxSize = '' + maxSize;
@@ -271,4 +274,4 @@ var getIndexNumberString = function (index, maxSize) {
     }
 
     return index;
-}
+};

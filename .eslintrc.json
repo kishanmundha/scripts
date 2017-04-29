@@ -1,0 +1,11 @@
+{
+    "extends": "standard",
+    "plugins": [
+        "standard",
+        "promise"
+    ],
+    "rules": {
+        "complexity": "error",
+        "semi": ["error", "always"]
+    }
+}
