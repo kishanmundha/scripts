@@ -41,9 +41,16 @@ var argUrl = args[0];
 
 //console.log(url.parse(argUrl));
 
-options.host = url.parse(argUrl).hostname;
-options.port = url.parse(argUrl).port || 80;
-options.path = url.parse(argUrl).path;
+var urlDetail = url.parse(argUrl);
+
+options.host = urlDetail.hostname;
+options.port = urlDetail.port || (urlDetail.protocol === 'https:' ? 443 : 80);
+options.protocol = urlDetail.protocol || 'http:';
+options.path = urlDetail.path;
+
+if (options.protocol === 'https:') {
+    http = require('https');
+}
 
 if (!options.host || !options.path) {
     console.log(colors.red('Invalid url'));
