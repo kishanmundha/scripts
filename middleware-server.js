@@ -4,6 +4,7 @@ var http = require('http');
 var https = require('https');
 var url = require('url');
 var colors = require('colors');
+var Buffer = require('buffer').Buffer;
 
 if (process.argv.length <= 3) {
   console.log('usage: node middleware-server <target> <localport>');
@@ -52,9 +53,9 @@ var server = http.createServer((serverReq, serverRes) => {
 
   serverReq.on('end', () => {
     let req = targetServer.http.request(reqOptions, (res) => {
-      let resData = '';
+      let resData = Buffer.from([]);
       res.on('data', (chunk) => {
-        resData += chunk;
+        resData = Buffer.concat([resData, chunk], resData.length + chunk.length);
       });
       res.on('end', () => {
         serverRes.writeHead(res.statusCode, Object.assign(res.headers, { 'access-control-allow-origin': '*' }));
