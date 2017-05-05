@@ -16,13 +16,13 @@ const localPort = process.argv[3];
 
 var targetServerUrlDetail = url.parse(targetServerUrl);
 
-if (!targetServerUrlDetail.host) {
+if (!targetServerUrlDetail.hostname) {
   console.log(colors.red('Invalid target url path. Target url should be a full path of domain with protocol.'));
   process.exit();
 }
 
 const targetServer = {
-  host: targetServerUrlDetail.host,
+  host: targetServerUrlDetail.hostname,
   port: targetServerUrlDetail.port || (targetServerUrlDetail.protocol === 'https:' ? 443 : 80),
   protocol: targetServerUrlDetail.protocol || 'http:',
   http: http
@@ -80,7 +80,7 @@ var server = http.createServer((serverReq, serverRes) => {
 });
 
 server.listen(localPort);
-console.log(`Listening ` + colors.bold(colors.blue(`${targetServerUrl}`)) + ` on port ` + colors.bold(colors.blue(`${localPort}`)) + `...`);
+console.log(`Listening ` + colors.bold(colors.blue(`${targetServer.protocol}//${targetServer.host}${targetServer.port === 80 ? '' : ':' + targetServer.port}`)) + ` on port ` + colors.bold(colors.blue(`${localPort}`)) + `...`);
 
 /*******************************
  * Helpers
