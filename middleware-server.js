@@ -11,8 +11,8 @@ if (process.argv.length <= 3) {
   process.exit();
 }
 
-const targetServerUrl = process.argv[2];
-const localPort = process.argv[3];
+var targetServerUrl = process.argv[2];
+var localPort = process.argv[3];
 
 var targetServerUrlDetail = url.parse(targetServerUrl);
 
@@ -21,7 +21,7 @@ if (!targetServerUrlDetail.hostname) {
   process.exit();
 }
 
-const targetServer = {
+var targetServer = {
   host: targetServerUrlDetail.hostname,
   port: targetServerUrlDetail.port || (targetServerUrlDetail.protocol === 'https:' ? 443 : 80),
   protocol: targetServerUrlDetail.protocol || 'http:',
@@ -32,10 +32,10 @@ if (targetServerUrlDetail.protocol === 'https:') {
   targetServer.http = https;
 }
 
-var server = http.createServer((serverReq, serverRes) => {
-  const requestTime = new Date();
+var server = http.createServer(function (serverReq, serverRes) {
+  var requestTime = new Date();
 
-  const reqOptions = {
+  var reqOptions = {
     host: targetServer.host,
     port: targetServer.port,
     path: serverReq.url,
@@ -46,24 +46,27 @@ var server = http.createServer((serverReq, serverRes) => {
   delete reqOptions.headers['host'];
   delete reqOptions.headers['referer'];
 
-  let serverReqBody = '';
-  serverReq.on('data', (chunk) => {
+  var serverReqBody = '';
+  serverReq.on('data', function (chunk) {
     serverReqBody += chunk;
   });
 
-  serverReq.on('end', () => {
-    let req = targetServer.http.request(reqOptions, (res) => {
-      let resData = Buffer.from([]);
-      res.on('data', (chunk) => {
+  serverReq.on('end', function () {
+    var req = targetServer.http.request(reqOptions, function (res) {
+      var resData = Buffer.from([]);
+      res.on('data', function (chunk) {
         resData = Buffer.concat([resData, chunk], resData.length + chunk.length);
       });
-      res.on('end', () => {
-        serverRes.writeHead(res.statusCode, Object.assign(res.headers, { 'access-control-allow-origin': '*' }));
+      res.on('end', function () {
+        serverRes.writeHead(res.statusCode, Object.assign(res.headers, {
+          'access-control-allow-origin': '*',
+          'access-control-allow-headers': 'Authorization'
+        }));
         serverRes.end(resData);
       });
     });
 
-    req.on('error', (err) => {
+    req.on('error', function (err) {
       sendErrorResponse(serverRes, err);
     });
 
@@ -72,7 +75,7 @@ var server = http.createServer((serverReq, serverRes) => {
     req.end();
   });
 
-  serverReq.on('error', (err) => {
+  serverReq.on('error', function (err) {
     sendErrorResponse(serverRes, err);
   });
 
@@ -80,7 +83,7 @@ var server = http.createServer((serverReq, serverRes) => {
 });
 
 server.listen(localPort);
-console.log(`Listening ` + colors.bold(colors.blue(`${targetServer.protocol}//${targetServer.host}${targetServer.port === 80 ? '' : ':' + targetServer.port}`)) + ` on port ` + colors.bold(colors.blue(`${localPort}`)) + `...`);
+console.log('Listening ' + colors.bold(colors.blue(targetServer.protocol + '//' + targetServer.host + (targetServer.port === 80 ? '' : ':' + targetServer.port))) + ' on port ' + colors.bold(colors.blue(localPort)) + '...');
 
 /*******************************
  * Helpers
@@ -90,7 +93,7 @@ console.log(`Listening ` + colors.bold(colors.blue(`${targetServer.protocol}//${
  * @param {IncomingMessage} res
  * @param {Object} err
  */
-const sendErrorResponse = (res, err) => {
+var sendErrorResponse = function (res, err) {
   res.writeHead(500, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(err));
 };
@@ -99,8 +102,8 @@ const sendErrorResponse = (res, err) => {
  * @param {Number} number
  * @param {Number} digit
  */
-const fixDigit = (number, digit) => {
-  let strNumber = number + '';
+var fixDigit = function (number, digit) {
+  var strNumber = number + '';
 
   while (strNumber.length < digit) {
     strNumber = '0' + strNumber;
@@ -113,8 +116,8 @@ const fixDigit = (number, digit) => {
  * Get time string
  * @param {Number} time
  */
-const getTimeString = (time) => {
-  const date = new Date(time);
+var getTimeString = function (time) {
+  var date = new Date(time);
 
   return fixDigit(date.getHours(), 2) + ':' + fixDigit(date.getMinutes(), 2) + ':' + fixDigit(date.getSeconds(), 2);
 };
