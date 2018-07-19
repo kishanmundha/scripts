@@ -60,7 +60,7 @@ if (!duplicateFileCount) {
 console.log(`${duplicateFileCount} files detect as duplicate`);
 
 console.log('Creating report...');
-const reportFilePath = createReport(duplicateFiles);
+const reportFilePath = createReport(duplicateFiles, duplicateFileCount);
 console.log('Report created');
 
 childProcess.execSync(reportFilePath);
@@ -343,7 +343,7 @@ function getSizeString(size) {
  * @returns {string} Generate file name
  */
 function createReport(data) {
-  const filepath = path.join(os.tmpdir() + 'duplicate-file-report.html');
+  const filepath = path.join(os.tmpdir() + '/duplicate-file-report.html');
   const html = `
   <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -366,7 +366,7 @@ function createReport(data) {
 
 <body>
   <div class="container">
-    <h4>Duplicate file statics</h4>
+    <h4>Duplicate file statics (${duplicateFileCount})</h4>
     <table class="table table-bordered table-sm">
       <thead>
         <tr>
