@@ -35,6 +35,16 @@ if (targetServerUrlDetail.protocol === 'https:') {
 var server = http.createServer(function (serverReq, serverRes) {
   var requestTime = new Date();
 
+  if (serverReq.method === 'OPTIONS') {
+    serverRes.writeHead(200, Object.assign({}, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, HEAD'
+    }));
+    serverRes.end();
+    return;
+  }
+
   var reqOptions = {
     host: targetServer.host,
     port: targetServer.port,
@@ -60,7 +70,8 @@ var server = http.createServer(function (serverReq, serverRes) {
       res.on('end', function () {
         serverRes.writeHead(res.statusCode, Object.assign(res.headers, {
           'access-control-allow-origin': '*',
-          'access-control-allow-headers': 'Authorization'
+          'access-control-allow-headers': '*',
+          'access-control-allow-methods': 'GET, PUT, POST, DELETE, HEAD'
         }));
         serverRes.end(resData);
       });
